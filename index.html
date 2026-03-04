@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>喜马拉雅 - 听歌</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- 新人引导遮罩 -->
+    <div id="guide-overlay" class="guide-overlay">
+        <div class="guide-bubble">
+            <p>海量音乐一键免费听</p>
+            <div class="guide-arrow"></div>
+        </div>
+        <button class="guide-close" onclick="closeGuide()">知道了</button>
+    </div>
+
+    <!-- 主体内容 -->
+    <div class="app-container">
+        <!-- 顶部 Tab 栏 -->
+        <div class="tab-header">
+            <div class="tab-scroll">
+                <div class="tab-item active" data-tab="recommend">推荐</div>
+                <div class="tab-item" data-tab="classic">经典老歌</div>
+                <div class="tab-item" data-tab="pop">流行热歌</div>
+                <div class="tab-item" data-tab="sleep">助眠音乐</div>
+                <div class="tab-item" data-tab="white">自然白噪音</div>
+                <div class="tab-item" data-tab="dj">动感DJ</div>
+                <div class="tab-item" data-tab="fitness">健身</div>
+                <div class="tab-item" data-tab="zen">禅意养生</div>
+                <div class="tab-item heart-tab hidden" data-tab="heart">心动模式</div>
+            </div>
+        </div>
+
+        <!-- 页面内容 -->
+        <div class="content-area">
+            <!-- 推荐 Tab -->
+            <div class="tab-content active" id="recommend">
+                <div class="song-grid">
+                    <!-- 歌曲卡片由 JS 动态生成 -->
+                </div>
+            </div>
+
+            <!-- 经典老歌 -->
+            <div class="tab-content" id="classic">
+                <div class="song-grid"></div>
+            </div>
+
+            <!-- 流行热歌 -->
+            <div class="tab-content" id="pop">
+                <div class="song-grid"></div>
+            </div>
+
+            <!-- 助眠音乐 -->
+            <div class="tab-content" id="sleep">
+                <div class="song-grid"></div>
+            </div>
+
+            <!-- 自然白噪音 -->
+            <div class="tab-content" id="white">
+                <div class="song-grid"></div>
+            </div>
+
+            <!-- 动感DJ -->
+            <div class="tab-content" id="dj">
+                <div class="song-grid"></div>
+            </div>
+
+            <!-- 健身 -->
+            <div class="tab-content" id="fitness">
+                <div class="song-grid"></div>
+            </div>
+
+            <!-- 禅意养生 -->
+            <div class="tab-content" id="zen">
+                <div class="song-grid"></div>
+            </div>
+
+            <!-- 心动模式 -->
+            <div class="tab-content" id="heart">
+                <div class="heart-header">
+                    <i class="fas fa-heart"></i>
+                    <span>你喜欢的音乐和相似推荐</span>
+                </div>
+                <div class="song-grid"></div>
+            </div>
+        </div>
+
+        <!-- 底部导航 -->
+        <div class="bottom-nav">
+            <div class="nav-item active">
+                <i class="fas fa-home"></i>
+                <span>首页</span>
+            </div>
+            <div class="nav-item" id="like-nav">
+                <i class="fas fa-heart"></i>
+                <span>喜欢</span>
+            </div>
+            <div class="nav-item">
+                <i class="fas fa-user"></i>
+                <span>我的</span>
+            </div>
+            <div class="nav-item">
+                <i class="fas fa-crown"></i>
+                <span>VIP</span>
+            </div>
+            <div class="nav-item">
+                <i class="fas fa-ellipsis-h"></i>
+                <span>更多</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 播放器页面 -->
+    <div class="player-page" id="player-page">
+        <div class="player-header">
+            <button class="back-btn" onclick="closePlayer()">
+                <i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="player-title">正在播放</div>
+            <button class="more-btn" onclick="showLoopSettings()">
+                <i class="fas fa-ellipsis-v"></i>
+            </button>
+        </div>
+
+        <div class="player-content">
+            <!-- 封面区域 -->
+            <div class="cover-section">
+                <div class="cover-disc" id="cover-disc">
+                    <img id="player-cover" src="" alt="cover">
+                </div>
+            </div>
+
+            <!-- 歌曲信息 -->
+            <div class="song-info">
+                <h2 id="player-song-name">--</h2>
+                <p id="player-artist">--</p>
+            </div>
+
+            <!-- 歌词区域 -->
+            <div class="lyrics-container">
+                <div class="lyrics-scroll" id="lyrics-scroll">
+                    <div class="lyrics-list" id="lyrics-list">
+                        <div class="lyric-item">暂无歌词，请欣赏</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 进度条 -->
+            <div class="progress-section">
+                <span id="current-time">0:00</span>
+                <div class="progress-bar" id="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+                <span id="total-time">0:00</span>
+            </div>
+
+            <!-- 播放控制 -->
+            <div class="player-controls">
+                <button class="control-btn" id="loop-btn" onclick="toggleLoop()">
+                    <i class="fas fa-list"></i>
+                </button>
+                <button class="control-btn" onclick="playPrev()">
+                    <i class="fas fa-step-backward"></i>
+                </button>
+                <button class="play-btn" id="play-btn" onclick="togglePlay()">
+                    <i class="fas fa-play"></i>
+                </button>
+                <button class="control-btn" onclick="playNext()">
+                    <i class="fas fa-step-forward"></i>
+                </button>
+                <button class="control-btn" id="like-btn" onclick="toggleLike()">
+                    <i class="far fa-heart"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 循环模式设置弹窗 -->
+    <div class="loop-modal" id="loop-modal">
+        <div class="loop-content">
+            <h3>循环模式</h3>
+            <div class="loop-options">
+                <div class="loop-option active" data-mode="list" onclick="selectLoopMode('list')">
+                    <i class="fas fa-list"></i>
+                    <span>列表播放</span>
+                </div>
+                <div class="loop-option" data-mode="single" onclick="selectLoopMode('single')">
+                    <i class="fas fa-redo"></i>
+                    <span>单曲循环</span>
+                </div>
+                <div class="loop-option" data-mode="random" onclick="selectLoopMode('random')">
+                    <i class="fas fa-random"></i>
+                    <span>随机播放</span>
+                </div>
+            </div>
+            <button class="loop-close" onclick="closeLoopSettings()">关闭</button>
+        </div>
+    </div>
+
+    <!-- 点赞引导气泡 -->
+    <div class="like-guide" id="like-guide">
+        <div class="like-bubble">
+            <p>点赞后会推荐更多相似音乐</p>
+        </div>
+    </div>
+
+    <!-- 心动模式引导 -->
+    <div class="heart-guide" id="heart-guide">
+        <div class="heart-bubble">
+            <p>你喜欢的音乐和相似推荐</p>
+            <div class="bubble-arrow"></div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
