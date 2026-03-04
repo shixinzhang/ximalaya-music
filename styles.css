@@ -335,8 +335,14 @@ body {
     border-top: 1px solid var(--border-color);
     display: flex;
     justify-content: space-around;
-    padding: 8px 0 20px;
+    align-items: center;
+    padding: 10px 0 22px;
     z-index: 99;
+}
+
+.app-container.now-playing-active .bottom-nav {
+    background: #FFFFFF;
+    border-top-color: rgba(0,0,0,0.08);
 }
 
 .nav-item {
@@ -345,17 +351,18 @@ body {
     align-items: center;
     gap: 4px;
     cursor: pointer;
-    padding: 4px 16px;
+    padding: 0 12px;
     transition: all 0.3s;
+    flex: 1;
 }
 
 .nav-item i {
-    font-size: 22px;
+    font-size: 20px;
     color: var(--text-muted);
 }
 
 .nav-item span {
-    font-size: 11px;
+    font-size: 10px;
     color: var(--text-muted);
 }
 
@@ -364,272 +371,327 @@ body {
     color: var(--primary-color);
 }
 
-.nav-item.active i {
-    filter: drop-shadow(0 0 8px rgba(255, 106, 0, 0.5));
+/* Light nav item colors in now-playing mode */
+.app-container.now-playing-active .nav-item i,
+.app-container.now-playing-active .nav-item span {
+    color: #BBBBBB;
 }
 
-/* 播放器页面 */
-.player-page {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(180deg, #2D1F1F 0%, #1A1A1A 50%, #0F0F0F 100%);
-    z-index: 200;
-    transform: translateY(100%);
-    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-    display: flex;
-    flex-direction: column;
+.app-container.now-playing-active .nav-item.active i,
+.app-container.now-playing-active .nav-item.active span {
+    color: var(--primary-color);
 }
 
-.player-page.active {
-    transform: translateY(0);
-}
-
-.player-header {
+/* Center play/pause button in nav */
+.nav-center-item {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 12px 20px;
-    padding-top: 50px;
+    justify-content: center;
+    flex: 1;
 }
 
-.back-btn, .more-btn {
-    background: rgba(255, 255, 255, 0.1);
+.center-play-btn {
+    width: 52px;
+    height: 32px;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.12);
     border: none;
     color: var(--text-primary);
-    font-size: 20px;
+    font-size: 14px;
     cursor: pointer;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
 }
 
-.player-title {
-    font-size: 16px;
-    font-weight: 500;
-    color: var(--text-secondary);
+.app-container.now-playing-active .center-play-btn {
+    background: #EFEFEF;
+    color: #333333;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
-.player-content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    padding: 0 32px;
-    padding-bottom: 40px;
+.center-play-btn:active {
+    transform: scale(0.95);
 }
 
-/* 封面 */
-.cover-section {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 30px 0;
-}
-
-.cover-disc {
-    width: 280px;
-    height: 280px;
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.6);
+/* ─── Now Playing Feed (scroll-snap cards) ─── */
+.content-area {
     position: relative;
 }
 
-.cover-disc img {
+.now-playing-view {
+    display: none;
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    overflow: hidden;
+}
+
+.now-playing-view.active {
+    display: block;
+}
+
+/* Scroll container — snap parent */
+.np-scroll-container {
+    width: 100%;
+    height: 100%;
+    overflow-y: scroll;
+    scroll-snap-type: y mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.np-scroll-container::-webkit-scrollbar { display: none; }
+
+/* ─── Individual card ─── */
+.np-card {
+    width: 100%;
+    height: 100%;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    display: flex;
+    flex-direction: column;
+    background: #FFFFFF;
+    overflow: hidden;
+    position: relative;
+    flex-shrink: 0;
+}
+
+/* Pagination badge */
+.np-card-badge {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    font-size: 12px;
+    color: rgba(0,0,0,0.35);
+    font-weight: 500;
+    z-index: 2;
+    letter-spacing: 0.5px;
+}
+
+/* Album art */
+.np-card-cover {
+    width: calc(100% - 32px);
+    margin: 20px auto 0;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 12px 36px rgba(0,0,0,0.16);
+    flex-shrink: 0;
+    aspect-ratio: 1 / 1;
+}
+
+.np-card-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.4s ease;
+}
+
+.np-card.active .np-card-cover img {
+    transform: scale(1.0);
+}
+
+/* Card content body */
+.np-card-body {
+    padding: 14px 16px 0;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+}
+
+/* Track info */
+.np-track-info {
+    margin-bottom: 10px;
+}
+
+.np-track-info h2 {
+    font-size: 19px;
+    font-weight: 700;
+    color: #1A1A1A;
+    margin-bottom: 5px;
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.np-track-info p {
+    font-size: 13px;
+    color: #999;
+}
+
+/* 3-line lyrics */
+.np-lyrics {
+    margin-bottom: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.np-lyric {
+    line-height: 1.85;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: all 0.35s ease;
+}
+
+.np-lyric-current {
+    font-size: 15px;
+    color: #1A1A1A;
+    font-weight: 600;
+}
+
+.np-lyric-side {
+    font-size: 12px;
+    color: #C0C0C0;
+}
+
+/* Artist bar */
+.np-artist-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 2px 0 8px;
+}
+
+.np-artist-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.np-artist-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #DDD;
+    flex-shrink: 0;
+}
+
+.np-artist-avatar img {
     width: 100%;
     height: 100%;
     object-fit: cover;
 }
 
-/* 歌曲信息 */
-.song-info {
-    text-align: center;
-    padding: 20px 0 30px;
-}
-
-.song-info h2 {
-    font-size: 26px;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: 10px;
-    letter-spacing: 0.5px;
-}
-
-.song-info p {
-    font-size: 15px;
-    color: var(--text-secondary);
-}
-
-/* 歌词区域 */
-.lyrics-container {
-    flex: 1;
+.np-artist-info > span {
+    font-size: 13px;
+    color: #1A1A1A;
+    font-weight: 500;
+    white-space: nowrap;
     overflow: hidden;
-    position: relative;
-    margin: 0 -16px;
+    text-overflow: ellipsis;
+    max-width: 90px;
 }
 
-.lyrics-scroll {
-    height: 100%;
-    overflow-y: auto;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    padding: 80px 16px;
-}
-
-.lyrics-scroll::-webkit-scrollbar {
-    display: none;
-}
-
-.lyrics-list {
-    text-align: center;
-}
-
-.lyric-item {
-    padding: 14px 20px;
-    font-size: 15px;
-    color: var(--text-muted);
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    line-height: 1.5;
-    opacity: 0.5;
-}
-
-.lyric-item.active {
-    font-size: 20px;
-    font-weight: 700;
+.np-subscribe-btn {
+    flex-shrink: 0;
+    border: 1.5px solid var(--primary-color);
+    background: none;
     color: var(--primary-color);
-    opacity: 1;
-    transform: scale(1.05);
-    text-shadow: 0 0 30px rgba(255, 106, 0, 0.4);
-}
-
-.lyric-item.played {
-    color: var(--text-secondary);
-    opacity: 0.7;
-}
-
-/* 进度条 */
-.progress-section {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 20px 0;
-}
-
-.progress-section span {
-    font-size: 12px;
-    color: var(--text-secondary);
-    min-width: 40px;
-    text-align: center;
-}
-
-.progress-bar {
-    flex: 1;
-    height: 4px;
-    background: rgba(255, 255, 255, 0.15);
-    border-radius: 2px;
+    font-size: 11px;
+    padding: 3px 9px;
+    border-radius: 12px;
     cursor: pointer;
-    position: relative;
+    transition: background 0.2s;
 }
 
-.progress-fill {
-    height: 100%;
-    background: var(--primary-gradient);
-    border-radius: 2px;
-    width: 0%;
-    transition: width 0.1s linear;
-    position: relative;
+.np-subscribe-btn:active {
+    background: rgba(255,106,0,0.1);
 }
 
-.progress-fill::after {
-    content: '';
-    position: absolute;
-    right: -6px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 12px;
-    height: 12px;
-    background: white;
-    border-radius: 50%;
-    box-shadow: 0 0 10px rgba(255, 106, 0, 0.8);
-    opacity: 0;
-    transition: opacity 0.2s;
-}
-
-.progress-bar:hover .progress-fill::after {
-    opacity: 1;
-}
-
-/* 播放控制 */
-.player-controls {
+.np-actions {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 30px 0;
+    gap: 0;
+    flex-shrink: 0;
 }
 
-.control-btn {
+.np-action-btn {
     background: none;
     border: none;
-    color: var(--text-primary);
-    font-size: 26px;
+    color: #AAAAAA;
+    font-size: 19px;
+    padding: 7px 8px;
     cursor: pointer;
-    padding: 12px;
-    transition: all 0.2s;
-    opacity: 0.8;
+    transition: color 0.2s, transform 0.15s;
+    line-height: 1;
 }
 
-.control-btn:hover {
-    opacity: 1;
+.np-action-btn:active {
+    transform: scale(0.88);
 }
 
-.control-btn:active {
-    transform: scale(0.9);
-}
-
-.control-btn.active {
+.np-action-btn.liked {
     color: var(--primary-color);
-    opacity: 1;
 }
 
-.play-btn {
-    width: 72px;
-    height: 72px;
+/* Thin progress line at bottom of card */
+.np-card-progress {
+    height: 2px;
+    background: #F0F0F0;
+    margin: auto 16px 0;
+    border-radius: 1px;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.np-card-progress-fill {
+    height: 100%;
     background: var(--primary-gradient);
-    border: none;
-    border-radius: 50%;
-    color: white;
-    font-size: 28px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 10px 40px rgba(255, 106, 0, 0.5);
-    transition: all 0.2s;
+    width: 0%;
+    transition: width 0.5s linear;
+    border-radius: 1px;
 }
 
-.play-btn:active {
-    transform: scale(0.95);
-    box-shadow: 0 6px 20px rgba(255, 106, 0, 0.4);
+/* Tab bar light theme when now-playing is active */
+.app-container.now-playing-active {
+    background: #F4F4F5;
 }
 
-.play-btn i {
-    margin-left: 4px;
+.app-container.now-playing-active .tab-header {
+    background: #FFFFFF;
+    border-bottom-color: rgba(0,0,0,0.07);
 }
 
-/* 循环模式弹窗 */
+.app-container.now-playing-active .tab-item {
+    color: #AAAAAA;
+    background: transparent;
+    font-size: 13px;
+}
+
+.app-container.now-playing-active .tab-item.active {
+    background: transparent;
+    color: #1A1A1A;
+    font-weight: 700;
+    position: relative;
+}
+
+.app-container.now-playing-active .tab-item.active::after {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 16px;
+    height: 3px;
+    background: var(--primary-color);
+    border-radius: 2px;
+}
+
+/* ─── 更多操作面板 ─── */
 .loop-modal {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(5px);
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(4px);
     z-index: 300;
     display: none;
     align-items: flex-end;
@@ -641,78 +703,240 @@ body {
 }
 
 .loop-content {
-    background: var(--bg-card);
+    background: #F2F2F7;
     width: 100%;
     max-width: 500px;
-    border-radius: 24px 24px 0 0;
-    padding: 24px;
-    animation: slideUp 0.3s ease;
+    border-radius: 20px 20px 0 0;
+    overflow: hidden;
+    animation: slideUp 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 @keyframes slideUp {
     from { transform: translateY(100%); }
-    to { transform: translateY(0); }
+    to   { transform: translateY(0); }
 }
 
-.loop-content h3 {
-    font-size: 18px;
-    margin-bottom: 24px;
-    text-align: center;
-    font-weight: 600;
-}
-
-.loop-options {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    margin-bottom: 24px;
-}
-
-.loop-option {
+/* ── Song header ── */
+.loop-song-header {
     display: flex;
     align-items: center;
-    gap: 16px;
-    padding: 16px;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: all 0.2s;
+    gap: 12px;
+    background: #FFFFFF;
+    padding: 16px 20px 14px;
+    border-bottom: 1px solid #E5E5EA;
 }
 
-.loop-option:hover {
-    background: var(--bg-hover);
+.loop-song-thumb {
+    width: 52px;
+    height: 52px;
+    border-radius: 8px;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: #DDD;
 }
 
-.loop-option.active {
-    background: rgba(255, 106, 0, 0.15);
+.loop-song-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
-.loop-option i {
-    font-size: 22px;
-    color: var(--text-secondary);
-    width: 24px;
-    text-align: center;
+.loop-song-meta {
+    min-width: 0;
 }
 
-.loop-option.active i {
-    color: var(--primary-color);
+.loop-song-meta h4 {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1C1C1E;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.loop-option span {
+.loop-song-meta p {
+    font-size: 12px;
+    color: #8E8E93;
+}
+
+.loop-song-meta p i {
+    font-size: 10px;
+}
+
+/* ── Sections (iOS grouped table style) ── */
+.loop-section {
+    background: #FFFFFF;
+    margin-top: 10px;
+}
+
+/* ── Row base ── */
+.loop-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    min-height: 52px;
+    gap: 12px;
+    border-bottom: 1px solid #E5E5EA;
+    background: #FFFFFF;
+}
+
+.loop-row-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    min-width: 0;
+}
+
+.loop-row-left span {
+    font-size: 15px;
+    color: #1C1C1E;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Plain inline icon (no box background) */
+.loop-plain-icon {
     font-size: 16px;
-    color: var(--text-primary);
-    font-weight: 500;
+    color: #636366;
+    width: 20px;
+    text-align: center;
+    flex-shrink: 0;
 }
 
+.loop-row-clickable {
+    cursor: pointer;
+}
+
+.loop-row-clickable:active {
+    background: #F0F0F0;
+}
+
+/* Right-side value text */
+.loop-row-value {
+    font-size: 14px;
+    color: #8E8E93;
+    flex-shrink: 0;
+}
+
+.timer-display {
+    font-size: 14px;
+    color: #8E8E93;
+}
+
+/* Right group: value + chevron */
+.loop-row-right-group {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.loop-chevron {
+    font-size: 11px;
+    color: #C7C7CC;
+}
+
+/* ── Speed chips ── */
+.speed-chips {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.speed-chip {
+    font-size: 14px;
+    color: #8E8E93;
+    cursor: pointer;
+    user-select: none;
+    transition: color 0.15s;
+    white-space: nowrap;
+}
+
+.speed-chip.active {
+    color: #007AFF;
+    font-weight: 700;
+}
+
+.speed-chip-custom {
+    color: #8E8E93;
+    font-size: 13px;
+}
+
+.speed-chip-custom i {
+    font-size: 10px;
+}
+
+/* ── Toggle switch (iOS blue) ── */
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 30px;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    inset: 0;
+    background: #E5E5EA;
+    border-radius: 30px;
+    transition: background 0.25s;
+}
+
+.toggle-slider::before {
+    content: '';
+    position: absolute;
+    height: 26px;
+    width: 26px;
+    left: 2px;
+    top: 2px;
+    background: #FFFFFF;
+    border-radius: 50%;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.22);
+}
+
+.toggle-switch input:checked + .toggle-slider {
+    background: #007AFF;
+}
+
+.toggle-switch input:checked + .toggle-slider::before {
+    transform: translateX(20px);
+}
+
+/* ── Cancel button ── */
 .loop-close {
+    display: block;
     width: 100%;
     padding: 16px;
-    background: var(--bg-hover);
+    margin-top: 10px;
+    background: #FFFFFF;
     border: none;
-    border-radius: 12px;
-    color: var(--text-primary);
+    border-top: none;
+    color: #1C1C1E;
     font-size: 16px;
-    cursor: pointer;
     font-weight: 500;
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.15s;
+    letter-spacing: 0.2px;
+}
+
+.loop-close:active {
+    background: #F0F0F0;
 }
 
 /* 引导气泡 */

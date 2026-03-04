@@ -33,6 +33,14 @@
 
         <!-- 页面内容 -->
         <div class="content-area">
+
+            <!-- 正在播放 feed -->
+            <div id="now-playing-view" class="now-playing-view">
+                <div class="np-scroll-container" id="np-scroll-container">
+                    <!-- 10 cards injected by JS -->
+                </div>
+            </div>
+
             <!-- 推荐 Tab -->
             <div class="tab-content active" id="recommend">
                 <!-- 主页大卡片播放器 -->
@@ -89,109 +97,116 @@
                 <i class="fas fa-home"></i>
                 <span>首页</span>
             </div>
-            <div class="nav-item" id="like-nav">
-                <i class="fas fa-heart"></i>
-                <span>喜欢</span>
+            <div class="nav-item active" id="music-listen-nav" onclick="showNowPlaying()">
+                <i class="fas fa-headphones-alt"></i>
+                <span>听音乐</span>
             </div>
-            <div class="nav-item active">
-                <i class="fas fa-music"></i>
-                <span>听歌</span>
+            <div class="nav-center-item">
+                <button class="center-play-btn" id="center-play-btn" onclick="togglePlay()">
+                    <i class="fas fa-play" id="center-play-icon"></i>
+                </button>
+            </div>
+            <div class="nav-item" id="subscribe-nav">
+                <i class="fas fa-bookmark"></i>
+                <span>订阅</span>
             </div>
             <div class="nav-item">
                 <i class="fas fa-user"></i>
                 <span>我的</span>
             </div>
-            <div class="nav-item">
-                <i class="fas fa-crown"></i>
-                <span>VIP</span>
-            </div>
         </div>
     </div>
 
-    <!-- 播放器页面 -->
-    <div class="player-page" id="player-page">
-        <div class="player-header">
-            <button class="back-btn" onclick="closePlayer()">
-                <i class="fas fa-chevron-down"></i>
-            </button>
-            <div class="player-title">正在播放</div>
-            <button class="more-btn" onclick="showLoopSettings()">
-                <i class="fas fa-ellipsis-h"></i>
-            </button>
-        </div>
+    <!-- 更多操作面板 -->
+    <div class="loop-modal" id="loop-modal" onclick="handleLoopModalBgClick(event)">
+        <div class="loop-content">
 
-        <div class="player-content">
-            <!-- 封面区域 -->
-            <div class="cover-section">
-                <div class="cover-disc">
-                    <img id="player-cover" src="" alt="cover">
+            <!-- 歌曲信息头 -->
+            <div class="loop-song-header">
+                <div class="loop-song-thumb">
+                    <img id="loop-song-img" src="" alt="">
+                </div>
+                <div class="loop-song-meta">
+                    <h4 id="loop-song-title">--</h4>
+                    <p>专辑：<span id="loop-song-artist">--</span> <i class="fas fa-chevron-right"></i></p>
                 </div>
             </div>
 
-            <!-- 歌曲信息 -->
-            <div class="song-info">
-                <h2 id="player-song-name">--</h2>
-                <p id="player-artist">--</p>
-            </div>
-
-            <!-- 歌词区域 -->
-            <div class="lyrics-container">
-                <div class="lyrics-scroll" id="lyrics-scroll">
-                    <div class="lyrics-list" id="lyrics-list">
-                        <div class="lyric-item">暂无歌词，请欣赏</div>
+            <!-- 第一区：收藏 / 待播 -->
+            <div class="loop-section">
+                <div class="loop-row loop-row-clickable">
+                    <div class="loop-row-left">
+                        <i class="far fa-star loop-plain-icon"></i>
+                        <span>收藏声音</span>
+                    </div>
+                </div>
+                <div class="loop-row loop-row-clickable">
+                    <div class="loop-row-left">
+                        <i class="fas fa-bars-staggered loop-plain-icon"></i>
+                        <span>添加待播</span>
                     </div>
                 </div>
             </div>
 
-            <!-- 进度条 -->
-            <div class="progress-section">
-                <span id="current-time">0:00</span>
-                <div class="progress-bar" id="progress-bar">
-                    <div class="progress-fill" id="progress-fill"></div>
+            <!-- 第二区：播放设置 -->
+            <div class="loop-section">
+                <div class="loop-row loop-row-clickable" onclick="cycleTimer()">
+                    <div class="loop-row-left">
+                        <i class="far fa-clock loop-plain-icon"></i>
+                        <span>定时关闭</span>
+                    </div>
+                    <span class="loop-row-value timer-display" id="timer-display">关闭</span>
                 </div>
-                <span id="total-time">3:00</span>
+
+                <div class="loop-row">
+                    <div class="loop-row-left">
+                        <i class="fas fa-gauge-high loop-plain-icon"></i>
+                        <span>播放速度</span>
+                    </div>
+                    <div class="speed-chips" id="speed-chips">
+                        <span class="speed-chip" data-speed="0.8" onclick="selectSpeed(0.8)">0.8</span>
+                        <span class="speed-chip active" data-speed="1.0" onclick="selectSpeed(1.0)">1.0</span>
+                        <span class="speed-chip" data-speed="1.2" onclick="selectSpeed(1.2)">1.2</span>
+                        <span class="speed-chip" data-speed="1.5" onclick="selectSpeed(1.5)">1.5</span>
+                        <span class="speed-chip speed-chip-custom">自定义 <i class="fas fa-chevron-right"></i></span>
+                    </div>
+                </div>
+
+                <div class="loop-row loop-row-clickable" onclick="cycleLoopMode()">
+                    <div class="loop-row-left">
+                        <i class="fas fa-repeat loop-plain-icon" id="loop-mode-icon"></i>
+                        <span>循环模式</span>
+                    </div>
+                    <div class="loop-row-right-group">
+                        <span class="loop-row-value" id="loop-mode-label">顺序播放</span>
+                        <i class="fas fa-chevron-right loop-chevron"></i>
+                    </div>
+                </div>
+
+                <div class="loop-row">
+                    <div class="loop-row-left">
+                        <i class="fas fa-forward-step loop-plain-icon"></i>
+                        <span>播放时默认跳过片头</span>
+                    </div>
+                    <label class="toggle-switch" onclick="event.stopPropagation()">
+                        <input type="checkbox" id="skip-intro-toggle" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+
+                <div class="loop-row" style="border-bottom: none">
+                    <div class="loop-row-left">
+                        <i class="fas fa-layer-group loop-plain-icon"></i>
+                        <span>与其他应用同时播放</span>
+                    </div>
+                    <label class="toggle-switch" onclick="event.stopPropagation()">
+                        <input type="checkbox" id="coplay-toggle">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
             </div>
 
-            <!-- 播放控制 -->
-            <div class="player-controls">
-                <button class="control-btn" id="like-btn" onclick="toggleLike()">
-                    <i class="far fa-heart"></i>
-                </button>
-                <button class="control-btn" onclick="playPrev()">
-                    <i class="fas fa-step-backward"></i>
-                </button>
-                <button class="play-btn" id="play-btn" onclick="togglePlay()">
-                    <i class="fas fa-play"></i>
-                </button>
-                <button class="control-btn" onclick="playNext()">
-                    <i class="fas fa-step-forward"></i>
-                </button>
-                <button class="control-btn" id="loop-btn" onclick="toggleLoop()">
-                    <i class="fas fa-list"></i>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- 循环模式设置弹窗 -->
-    <div class="loop-modal" id="loop-modal">
-        <div class="loop-content">
-            <h3>循环模式</h3>
-            <div class="loop-options">
-                <div class="loop-option active" data-mode="list" onclick="selectLoopMode('list')">
-                    <i class="fas fa-list"></i>
-                    <span>列表播放</span>
-                </div>
-                <div class="loop-option" data-mode="single" onclick="selectLoopMode('single')">
-                    <i class="fas fa-redo"></i>
-                    <span>单曲循环</span>
-                </div>
-                <div class="loop-option" data-mode="random" onclick="selectLoopMode('random')">
-                    <i class="fas fa-random"></i>
-                    <span>随机播放</span>
-                </div>
-            </div>
-            <button class="loop-close" onclick="closeLoopSettings()">关闭</button>
+            <button class="loop-close" onclick="closeLoopSettings()">取消</button>
         </div>
     </div>
 
