@@ -32,24 +32,6 @@ const songsData = {
         { id: 21, name: '森林鸟鸣', artist: '大自然', cover: 'https://picsum.photos/seed/white3/300/300', lyrics: generateLyrics('森林鸟鸣') },
         { id: 22, name: '篝火燃烧', artist: '环境音', cover: 'https://picsum.photos/seed/white4/300/300', lyrics: generateLyrics('篝火燃烧') },
     ],
-    dj: [
-        { id: 23, name: '电音狂潮', artist: 'DJ小黑', cover: 'https://picsum.photos/seed/dj1/300/300', lyrics: generateLyrics('电音狂潮') },
-        { id: 24, name: '夜店嗨曲', artist: 'DJ阿杰', cover: 'https://picsum.photos/seed/dj2/300/300', lyrics: generateLyrics('夜店嗨曲') },
-        { id: 25, name: '蹦迪神曲', artist: 'DJ Mix', cover: 'https://picsum.photos/seed/dj3/300/300', lyrics: generateLyrics('蹦迪神曲') },
-        { id: 26, name: '车载重低音', artist: 'DJ劲爆', cover: 'https://picsum.photos/seed/dj4/300/300', lyrics: generateLyrics('车载重低音') },
-    ],
-    fitness: [
-        { id: 27, name: '运动节拍', artist: '健身音乐', cover: 'https://picsum.photos/seed/fit1/300/300', lyrics: generateLyrics('运动节拍') },
-        { id: 28, name: '燃脂进行时', artist: '动感音乐', cover: 'https://picsum.photos/seed/fit2/300/300', lyrics: generateLyrics('燃脂进行时') },
-        { id: 29, name: '力量训练', artist: '健身房', cover: 'https://picsum.photos/seed/fit3/300/300', lyrics: generateLyrics('力量训练') },
-        { id: 30, name: '跑步节奏', artist: '运动BGM', cover: 'https://picsum.photos/seed/fit4/300/300', lyrics: generateLyrics('跑步节奏') },
-    ],
-    zen: [
-        { id: 31, name: '禅意', artist: '心灵音乐', cover: 'https://picsum.photos/seed/zen1/300/300', lyrics: generateLyrics('禅意') },
-        { id: 32, name: '茶道', artist: '古風', cover: 'https://picsum.photos/seed/zen2/300/300', lyrics: generateLyrics('茶道') },
-        { id: 33, name: '冥想', artist: '瑜伽音乐', cover: 'https://picsum.photos/seed/zen3/300/300', lyrics: generateLyrics('冥想') },
-        { id: 34, name: '太极', artist: '养生音乐', cover: 'https://picsum.photos/seed/zen4/300/300', lyrics: generateLyrics('太极') },
-    ]
 };
 
 // 生成歌词函数
@@ -104,13 +86,13 @@ function generateLyrics(songName) {
     };
     
     return lyricsMap[songName] || [
-        { time: 0, text: '音乐响起' },
-        { time: 5, text: '旋律流淌' },
-        { time: 10, text: '沉浸在音乐的世界里' },
+        { time: 0, text: '音乐缓缓响起' },
+        { time: 5, text: '旋律在心中流淌' },
+        { time: 10, text: '沉浸在美妙的音乐中' },
         { time: 15, text: '感受每一个音符' },
         { time: 20, text: '音乐治愈心灵' },
         { time: 25, text: '让我们一起聆听' },
-        { time: 30, text: '享受此刻的美好' },
+        { time: 30, text: '享受此刻的美好时光' },
     ];
 }
 
@@ -128,11 +110,30 @@ let heartGuideShown = localStorage.getItem('heartGuideShown') === 'true';
 // 初始化
 document.addEventListener('DOMContentLoaded', () => {
     initTabs();
-    renderSongs();
+    renderSongLists();
     initPlayer();
     checkGuide();
     updateHeartTab();
+    updateHeroPlayer();
 });
+
+// 更新主页大卡片
+function updateHeroPlayer() {
+    const firstSong = songsData.recommend[0];
+    if (firstSong) {
+        document.getElementById('hero-cover-img').src = firstSong.cover;
+        document.getElementById('hero-title').textContent = `适合一个人听的${firstSong.name}`;
+        document.getElementById('hero-artist').textContent = `${firstSong.artist} · 每日更新30首`;
+    }
+}
+
+// 播放主页推荐
+function playHero() {
+    const firstSong = songsData.recommend[0];
+    if (firstSong) {
+        playSong(firstSong.id, 'recommend');
+    }
+}
 
 // Tab 切换
 function initTabs() {
@@ -160,22 +161,22 @@ function initTabs() {
 }
 
 // 渲染歌曲列表
-function renderSongs() {
+function renderSongLists() {
     Object.keys(songsData).forEach(category => {
-        const container = document.getElementById(category)?.querySelector('.song-grid');
+        const container = document.getElementById(`${category}-list`);
         if (!container) return;
         
         container.innerHTML = songsData[category].map(song => `
-            <div class="song-card" onclick="playSong(${song.id}, '${category}')">
-                <div class="song-cover">
+            <div class="song-list-item" onclick="playSong(${song.id}, '${category}')">
+                <div class="song-list-cover">
                     <img src="${song.cover}" alt="${song.name}">
-                    <div class="song-play-icon">
-                        <i class="fas fa-play"></i>
-                    </div>
                 </div>
-                <div class="song-info-card">
-                    <div class="song-name">${song.name}</div>
-                    <div class="song-artist">${song.artist}</div>
+                <div class="song-list-info">
+                    <div class="song-list-name">${song.name}</div>
+                    <div class="song-list-artist">${song.artist}</div>
+                </div>
+                <div class="song-list-play">
+                    <i class="fas fa-play"></i>
                 </div>
             </div>
         `).join('');
@@ -215,7 +216,6 @@ function playSong(songId, category) {
     
     // 显示播放器
     document.getElementById('player-page').classList.add('active');
-    document.getElementById('cover-disc').classList.add('playing');
     
     // 更新播放按钮
     updatePlayButton();
@@ -253,7 +253,6 @@ function startPlayback() {
         const progress = (currentTime / duration) * 100;
         document.getElementById('progress-fill').style.width = progress + '%';
         document.getElementById('current-time').textContent = formatTime(currentTime);
-        document.getElementById('total-time').textContent = formatTime(duration);
         
         // 更新歌词高亮
         updateLyricsHighlight();
@@ -305,12 +304,6 @@ function formatTime(seconds) {
 function togglePlay() {
     isPlaying = !isPlaying;
     updatePlayButton();
-    
-    if (isPlaying) {
-        document.getElementById('cover-disc').classList.add('playing');
-    } else {
-        document.getElementById('cover-disc').classList.remove('playing');
-    }
 }
 
 function updatePlayButton() {
@@ -321,7 +314,6 @@ function updatePlayButton() {
 // 关闭播放器
 function closePlayer() {
     document.getElementById('player-page').classList.remove('active');
-    document.getElementById('cover-disc').classList.remove('playing');
 }
 
 // 上一首/下一首
@@ -393,27 +385,28 @@ function updateLikeButton() {
 // 更新心动模式 Tab
 function updateHeartTab() {
     const heartTab = document.querySelector('.heart-tab');
-    const heartContent = document.getElementById('heart');
+    const heartList = document.getElementById('heart-list');
     
     if (likedSongs.length > 0) {
         heartTab.classList.remove('hidden');
         
         // 渲染心动模式内容
-        const container = heartContent.querySelector('.song-grid');
-        container.innerHTML = likedSongs.map(song => `
-            <div class="song-card" onclick="playSong(${song.id}, '${song.category}')">
-                <div class="song-cover">
+        heartList.innerHTML = likedSongs.map(song => `
+            <div class="song-list-item" onclick="playSong(${song.id}, '${song.category}')">
+                <div class="song-list-cover">
                     <img src="${song.cover}" alt="${song.name}">
-                    <div class="song-play-icon">
-                        <i class="fas fa-play"></i>
-                    </div>
                 </div>
-                <div class="song-info-card">
-                    <div class="song-name">${song.name}</div>
-                    <div class="song-artist">${song.artist}</div>
+                <div class="song-list-info">
+                    <div class="song-list-name">${song.name}</div>
+                    <div class="song-list-artist">${song.artist}</div>
+                </div>
+                <div class="song-list-play">
+                    <i class="fas fa-play"></i>
                 </div>
             </div>
         `).join('');
+    } else {
+        heartList.innerHTML = '<div style="text-align:center;padding:40px;color:#666;">还没有喜欢的歌曲，快去听歌点赞吧~</div>';
     }
 }
 
@@ -459,8 +452,8 @@ function showLikeGuide() {
     // 定位到点赞按钮附近
     const likeBtn = document.getElementById('like-btn');
     const rect = likeBtn.getBoundingClientRect();
-    guide.style.left = (rect.left + rect.width / 2 - 80) + 'px';
-    guide.style.top = (rect.top - 60) + 'px';
+    guide.style.left = (rect.left + rect.width / 2 - 100) + 'px';
+    guide.style.top = (rect.top - 70) + 'px';
     
     localStorage.setItem('likeGuideShown', 'true');
 }
@@ -477,8 +470,8 @@ function showHeartGuide() {
     // 定位到心动模式 tab
     const heartTab = document.querySelector('.heart-tab');
     const rect = heartTab.getBoundingClientRect();
-    guide.style.left = (rect.left + rect.width / 2 - 80) + 'px';
-    guide.style.top = (rect.bottom + 10) + 'px';
+    guide.style.left = (rect.left + rect.width / 2 - 90) + 'px';
+    guide.style.top = (rect.bottom + 12) + 'px';
     
     localStorage.setItem('heartGuideShown', 'true');
     heartGuideShown = true;
@@ -509,16 +502,13 @@ function initPlayer() {
         document.getElementById('progress-fill').style.width = (percent * 100) + '%';
     });
     
-    // 底部导航切换
-    document.querySelectorAll('.nav-item').forEach(item => {
-        item.addEventListener('click', function() {
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            this.classList.add('active');
-            
-            // 点击喜欢切换到心动模式
-            if (this.id === 'like-nav') {
-                document.querySelector('.heart-tab').click();
-            }
-        });
+    // 点击喜欢导航跳转到心动模式
+    document.getElementById('like-nav').addEventListener('click', () => {
+        const heartTab = document.querySelector('.heart-tab');
+        if (!heartTab.classList.contains('hidden')) {
+            heartTab.click();
+        } else {
+            alert('还没有喜欢的歌曲哦，快去听歌点赞吧~');
+        }
     });
 }
